@@ -1266,16 +1266,11 @@ p2 <- L_Strain_seq_plot %>%
     aes(x = L_Strain, y = Outcome),  # posterior-inferred L_Strain and observed Outcome
     alpha = 0.3, size = 2, inherit.aes = FALSE
   ) +
-  geom_vline(
-    xintercept = c(min(strain_posterior_median), max(strain_posterior_median)),
-    linetype   = "dashed", colour = "steelblue", alpha = 0.5
-  ) +
   scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25)) +
   labs(
     x       = "L_Strain (latent, posterior-inferred)",
     y       = "Outcome",
     title   = "Posterior: L_Strain -> Outcome (non-linear)"
-    #,caption = "Points: posterior-inferred L_Strain and observed Outcome\nCurve: posterior-inferred L_Strain model, extrapolation outside of posterior range\nDashed lines: posterior-supported range"
   ) +
   theme_minimal()
 
