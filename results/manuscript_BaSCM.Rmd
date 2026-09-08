@@ -48,11 +48,11 @@ author-note:
   disclosures:
     study-registration: "This article is a methodological and theoretical contribution. No new empirical data were collected, and the work was therefore not preregistered."
     data-sharing: "The analysis code as well as the reproducible manuscript are available at <https://github.com/pskaschel/BaSCMs>."
-    related-report: ~
     conflict-of-interest: "The authors have no conflicts of interest to disclose."
     financial-support: "Patrick Kaschel was supported by a doctoral scholarship of the Free State of Saxony (Landesgraduiertenstipendium des Freistaates Sachsen)."
     gratitude: "We are grateful for discussions with several researchers in the field on their perspectives on theory formalization, which substantially improved this work."
     authorship-agreements: "* Denny Borsboom and Daniel Leising contributed equally as senior authors."
+    related-report: "The findings and ideas in this manuscript have not been disseminated previously: no preprint has been posted, and the work has not been presented at conferences or published elsewhere in any form."
 # If true, tables and figures are mingled with the text instead of listed at the end of the document.
 floatsintext: true
 # Numbered lines (.pdf and .docx only)
@@ -87,6 +87,10 @@ library(knitr)
 # Paths are relative to the "results" folder, which knitr uses as working
 # directory when rendering this file; the analysis script and its outputs live
 # in the sibling folder "analysis". Keep this folder structure when reproducing.
+
+#To render the manuscript, install the apaquarto extension once in the results folder:
+#quarto add wjschne/apaquarto
+
 load("../analysis/bscms-runningsexample.RData")
 
 # The code chunks shown below are pulled directly out of the analysis script, so
@@ -192,7 +196,7 @@ Theories formalized in accordance with the proposed framework can be visually re
 Theories formalized in the BaSCM framework are fully specified in the sense that all functional relationships and parameter priors are explicitly defined. As a consequence, they are generative: data can be simulated directly from the theory, which is why such a formalization may also be called a generative or a computational model. This is where the framework differs most clearly from treating a fitted statistical model as a theory. A structural equation model (SEM), for instance, is not by itself generative. It specifies structural relations among variables, but simulating data from it additionally requires parameter values, distributional forms for the exogenous variables and the error terms, and a commitment to the functional form of each relationship, which is often only partially specified and implicitly determined by the chosen estimation approach or modeling assumptions. The same holds for conceptual models more generally: identifying the components of a system and their relations does not yet determine how the system would behave under given circumstances [@crielaard2022]. Because a BaSCM leaves none of these elements implicit, the definition of the parameter space is part of the formal theory itself (see the priors in @fig-sso), and different regions of that space can imply substantially different predictions. Simulating from the theory further allows researchers to examine how uncertainty in the assumptions propagates to uncertainty in the predictions [see @crielaard2022 for an insightful discussion of sensitivity analyses of this kind].
 
 ### Running Example
-The formal theory can be implemented using the R package *brms* [@burkner2017]. For data processing, we use the R *tidyverse* [@wickham2019]. Conditional independence assumptions (see section on causality) are assessed using the package *dagitty* [@textor2016]. In brms, each causal path is specified as a structural equation via `bf()`. The parameter priors are defined as part of the theory, and setting `sample_prior = "only"` in `brm()` samples exclusively from the priors, i.e., simulates data from the formal theory without any empirical updating:
+All analyses were conducted in R [@rcoreteam2021]. The formal theory can be implemented using the R package *brms* [@burkner2017]. For data processing, we use the R *tidyverse* [@wickham2019]. Conditional independence assumptions (see section on causality) are assessed using the package *dagitty* [@textor2016]. In brms, each causal path is specified as a structural equation via `bf()`. The parameter priors are defined as part of the theory, and setting `sample_prior = "only"` in `brm()` samples exclusively from the priors, i.e., simulates data from the formal theory without any empirical updating:
 
 ```{r}
 #| label: code-sso-linear
@@ -280,7 +284,7 @@ An important takeaway from the running example is that latent variables can make
 ```{r}
 #| label: fig-sso-latent
 #| fig-cap: "Latent Variable in Formal Stressor-Strain-Outcome Theory"
-#| apa-note: "Left: circles show observed Strain. Right: circles show posterior-inferred L_Strain and observed Outcome; curve extrapolated outside of posterior range of L_Strain; dashed lines: posterior-supported range."
+#| apa-note: "Left: circles show observed Strain. Right: circles show posterior-inferred L_Strain and observed Outcome; curve extrapolated outside of posterior range of L_Strain. The sharp left edge of the latent scores results from the parameters of the latent equation being held (nearly) fixed for identification."
 #| apa-twocolumn: true
 #| out-width: 100%
 
@@ -354,15 +358,7 @@ ci_daglaz_clean %>%
 As outlined in the overview above, we consider the possibility of updating a formalized theory in light of data as a very important feature of the framework. It supports both forms of inference distinguished in the theory construction literature [@borsboom2024; @haslbeck2022]: direct inference through Bayesian estimation of the model parameters, which yields posterior distributions, and indirect inference through the comparison of the distributions implied by the theory before and after observing the data. This is consistent with developments in cognitive psychology, where Bayesian priors and their updating are increasingly regarded as integral components of scientific theories [cf. @vanpaemel2012], and it provides a means of assessing the productivity of a theory, that is, the extent to which the patterns it implies correspond to the empirical observations of the phenomenon under investigation [@vandongen2025]. Because the posterior of one study can serve as the prior of the next, theory refinement across studies becomes a formal updating operation rather than an informal synthesis of findings.
 
 ### Running Example
-In *brms*, updating the formal theory with the empirical data only requires refitting the prior-only model with the likelihood of the data included. This can be done conveniently via `update()`, keeping the structural equations and priors of the formal theory unchanged:
-
-```{r}
-#| label: code-sso-update
-#| echo: true
-#| eval: false
-```
-
-The augmented theory reported in @fig-ssolaz-indir and @tbl-update was fitted in a single step with `sample_prior = "yes"` (see the code in the section on modularity), which retains draws from the priors alongside the posterior and is equivalent to the two-step procedure shown above. @fig-ssolaz-indir from above, which shows how the theory was augmented, also displays the prior and posterior estimates. Close agreement indicates that the theory's risky quantitative predictions [@meehl1978; @meehl1990b] were supported by the data, whereas substantial divergence indicates a targeted correction, localized at the level of individual parameters. Several methods for such prior-posterior comparisons [e.g., @vanpaemel2020] and for assessing fit to empirical data [e.g., @mcelreath2020 for an overview] are available but not discussed here in detail. A simple and directly interpretable summary is the shift of the posterior mean relative to the prior mean, expressed in units of the prior standard deviation ($z$ in @tbl-update): it states by how many standard deviations of theoretical commitment the data have moved a given parameter. This measure is, however, ambiguous in isolation: a small shift may indicate agreement between theory and data, but also a likelihood that is uninformative about the parameter in question. Reporting it alongside the prior and the posterior standard deviation resolves the ambiguity, because the two quantities separate the direction of the correction from the information the data carried: a small shift combined with a posterior standard deviation well below the prior one means that the data were informative and agreed with the theory, whereas a small shift without such contraction means that the data said little about that parameter. Parameters whose priors serve identification rather than theoretical commitment (see the section on latent variables) should be excluded from this interpretation. @kallioinen2024 present a more principled treatment of the same problem based on power-scaling sensitivity analysis, which we consider very useful in this context.
+In *brms*, updating the formal theory with the empirical data only requires refitting the prior-only model with the likelihood of the data included. This can be done conveniently via `update()`, keeping the structural equations and priors of the formal theory unchanged. The augmented theory reported in @fig-ssolaz-indir and @tbl-update was fitted in a single step with `sample_prior = "yes"` (see the code in the section on modularity), which retains draws from the priors alongside the posterior. This is equivalent to updating a prior-only model based on data. @fig-ssolaz-indir from above, which shows how the theory was augmented, also displays these prior and posterior estimates. Close agreement indicates that the theory's risky quantitative predictions [@meehl1978; @meehl1990b] were supported by the data, whereas substantial divergence indicates a targeted correction, localized at the level of individual parameters. Several methods for such prior-posterior comparisons [e.g., @vanpaemel2020] and for assessing fit to empirical data [e.g., @mcelreath2020 for an overview] are available but not discussed here in detail. A simple and directly interpretable summary is the shift of the posterior mean relative to the prior mean, expressed in units of the prior standard deviation ($z$ in @tbl-update): it states by how many standard deviations of theoretical commitment the data have moved a given parameter. This measure is, however, ambiguous in isolation: a small shift may indicate agreement between theory and data, but also a likelihood that is uninformative about the parameter in question. Reporting it alongside the prior and the posterior standard deviation resolves the ambiguity, because the two quantities separate the direction of the correction from the information the data carried: a small shift combined with a posterior standard deviation well below the prior one means that the data were informative and agreed with the theory, whereas a small shift without such contraction means that the data said little about that parameter. Parameters whose priors serve identification rather than theoretical commitment (see the section on latent variables) should be excluded from this interpretation. @kallioinen2024 present a more principled treatment of the same problem based on power-scaling sensitivity analysis, which we consider very useful in this context.
 
 ```{r}
 #| label: tbl-update
@@ -374,6 +370,9 @@ The augmented theory reported in @fig-ssolaz-indir and @tbl-update was fitted in
 update_table_ssolaz %>% 
   knitr::kable(escape = F)
 ```
+
+## Transparency and Openness
+This article is a methodological and theoretical contribution; no new empirical data were collected, and preregistration was therefore not applicable. All data reported were simulated from the documented, seeded data-generating process described above. The analysis script, the session information documenting the software environment, and the reproducible manuscript source are available at <https://github.com/pskaschel/BaSCMs>.
 
 # Discussion
 We presented a theory formalization framework that meets the characteristics of formal theories discussed in the literature while remaining consistent with current theory construction methodologies, and we illustrated several of its features using a running example. One central property is that the formalized theory is adequately implemented in the model confronted with data: the theory implies quantitative predictions that can be simulated, conditional independence relations that can be tested, and parameter values that can be updated, which also allows two competing formalizations to be confronted at exactly those points where they imply different observations.
