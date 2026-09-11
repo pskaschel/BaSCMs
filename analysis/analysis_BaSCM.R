@@ -1174,12 +1174,7 @@ summary(bscm_latent_detail)
 
 pp_check(bscm_latent_detail, resp = "Outcome",  ndraws = 30)
 
-# Posterior-inferred latent strain per observation: the imputed values
-# Ymi_LStrain[i] are informed both by the stressor (via the structural equation
-# for L_Strain) and by the outcome (via the likelihood of the Outcome equation).
-# Note: posterior_epred(..., resp = "LStrain") would instead return
-# E[L_Strain | Stressor], i.e., the regression line, which does not use the
-# information carried by the outcome.
+# Posterior-inferred latent strain per observation
 strain_posterior_median <- as_draws_df(bscm_latent_detail) %>%
   as_tibble() %>%
   select(starts_with("Ymi_LStrain")) %>%
@@ -1344,9 +1339,7 @@ ci_tests_dag_laz
 
 ci_cols_laz <- ci_bound_cols(ci_tests_dag_laz)
 
-# Format a dagitty test label "A _||_ B | C" as math for the manuscript table,
-# matching the notation used in the text (renders in both docx and PDF and
-# leaves no ASCII pipe that could break markdown tables)
+# Format a dagitty test label "A _||_ B | C" as math for the manuscript table
 fmt_ci_test <- function(x) {
   parts <- str_match(x, "^(\\S+) _\\|\\|_ (\\S+) \\| (.+)$")
   stopifnot(!anyNA(parts[, 1]))
